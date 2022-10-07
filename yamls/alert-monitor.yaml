@@ -1,0 +1,126 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: alert-monitor
+data:
+  application.yaml: |
+    server:
+      port: 61050
+      servlet:
+        session:
+          cookie:
+            max-age: P30D
+          timeout: 30d
+
+    configs:
+      path: data
+
+    logging:
+      file:
+        name: alert-monitor
+        path: data/logs
+
+    alerting:
+      max-log-history: 30
+      max-log-file-size: 50MB
+      filter:
+        selector: severity
+        value: error
+      default-priority: P3
+
+    label-configs:
+      global: []
+      sub-category-specific:
+        container:
+          - container
+        pod:
+          - pod
+        node:
+          - instance
+        actuator:
+          - application
+        
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: alert-monitor
+spec:
+  selector:
+    matchLabels:
+      app: alert-monitor
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: alert-monitor
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: kubernetes.io/hostname
+                    operator: In
+                    values:
+                      - kworker-1
+      containers:
+        - name: alert-monitor
+          image: alert-monitor:1.0.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 61050
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 61050
+            initialDelaySeconds: 10
+            timeoutSeconds: 2
+            periodSeconds: 10
+            failureThreshold: 2
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 61050
+            initialDelaySeconds: 10
+            timeoutSeconds: 2
+            periodSeconds: 10
+            failureThreshold: 2
+          env:
+            - name: SPRING_SECURITY_USER_NAME
+              value: "admin"
+            - name: SPRING_SECURITY_USER_PASSWORD
+              value: "sim123"
+          volumeMounts:
+            - name: data
+              mountPath: /data
+            - name: config
+              mountPath: "/config"
+              readOnly: true
+      volumes:
+        - name: data
+          hostPath:
+            path: /root/data/alert-monitor
+            type: DirectoryOrCreate
+        - name: config
+          configMap:
+            name: alert-monitor
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: alert-monitor
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "61050"
+    prometheus.io/path: "/actuator/prometheus"
+spec:
+  selector:
+    app: alert-monitor
+  ports:
+    - protocol: "TCP"
+      port: 8484
+      nodePort: 32600
+      targetPort: 61050
+  type: NodePort
