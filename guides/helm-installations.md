@@ -67,8 +67,8 @@ subjects:
 # **Grafana**
 ### Create SC & PVs
 ```
-kubectl create -f sc-grafana.yaml
-kubectl create -f pv-grafana.yaml
+kubectl create -f sc/sc-grafana.yaml
+kubectl create -f pv/pv-grafana.yaml
 ```
 
 ### Install Grafana
@@ -104,15 +104,15 @@ helm install node-exporter prometheus-community/prometheus-node-exporter -f valu
 ### If any previous Prometheus Installations
 ```
 helm delete prometheus
-kubectl delete pv pv-prometheus-alert-manager.yaml
-kubectl delete pv pv-prometheus-server.yaml
+kubectl delete pv pv/pv-prometheus-alert-manager.yaml
+kubectl delete pv pv/pv-prometheus-server.yaml
 ```
 ### Create SCs & PVs
 ```
-kubectl create -f sc-prometheus-alert-manager.yaml
-kubectl create -f sc-prometheus-server.yaml
-kubectl create -f pv-prometheus-alert-manager.yaml
-kubectl create -f pv-prometheus-server.yaml
+kubectl create -f sc/sc-prometheus-alert-manager.yaml
+kubectl create -f sc/sc-prometheus-server.yaml
+kubectl create -f pv/pv-prometheus-alert-manager.yaml
+kubectl create -f pv/pv-prometheus-server.yaml
 ```
 ### Install
 ```
@@ -162,8 +162,8 @@ helm repo update
 
 ### Create SCs & PVs
 ```
-kubectl create -f sc-elasticsearch.yaml
-kubectl create -f pv-elasticsearch.yaml
+kubectl create -f sc/sc-elasticsearch.yaml
+kubectl create -f pv/pv-elasticsearch.yaml
 ```
 
 ### Install
@@ -190,8 +190,8 @@ helm install kibana elastic/kibana -f ./values-kibana.yaml --version 7.17.3
 # **Logstash**
 ### Create SCs & PVs
 ```
-kubectl create -f sc-logstash.yaml
-kubectl create -f pv-logstash.yaml
+kubectl create -f sc/sc-logstash.yaml
+kubectl create -f pv/pv-logstash.yaml
 ```
 
 ### Install
