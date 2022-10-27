@@ -29,7 +29,7 @@ kubectl create serviceaccount admin
 ## **Get Auth Token**
 ### Get the secret associated with the Service Account
 ```
-get serviceaccounts admin -o yaml
+kubectl get serviceaccounts admin -o yaml
 ```
 ### Get the Bearer Token
 ```
@@ -61,6 +61,11 @@ subjects:
 - kind: ServiceAccount
   name: admin
   namespace: default
+```
+
+### Install
+```
+helm install kubernetes-dashboard k8s-dashboard/kubernetes-dashboard --version 5.11.0 -f values-kubernetes-dashboard.yaml
 ```
 ---
 
