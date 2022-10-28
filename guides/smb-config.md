@@ -27,6 +27,10 @@ Append the following lines to `/etc/samba/smb.conf` :
    path = /root/shared
    read only = no
    browsable = yes
+   public = yes
+   writable = yes
+   create mask = 0777
+   directory mask = 0777
 ```
 
 **What we Just added**
